@@ -114,6 +114,10 @@
   const trackBtn = $("trackBtn");
   const progressWrap = $("progressWrap");
   const progressFill = $("progressFill");
+  const trackBox = $("trackBox");
+  const trackRate = $("trackRate");
+  const trackCounts = $("trackCounts");
+  const trackAdvice = $("trackAdvice");
   const trackReadout = $("trackReadout");
   const retrackBtn = $("retrackBtn");
   const delFromHereBtn = $("delFromHereBtn");
@@ -594,6 +598,7 @@
       state.peakFrame = null;
       state.peakPinned = false;
       trackReadout.textContent = "프레임 기준이 바뀌어 점을 지웠습니다 — 다시 추적하세요.";
+      hideTrackBox();
       delPointBtn.disabled = true;
       clearPointsBtn.disabled = true;
       retrackBtn.disabled = true;
@@ -787,11 +792,34 @@
    * @param {number|null} startAt 이 프레임부터 다시 추적한다. null이면 구간 처음부터.
    *   이어서 추적할 때는 앞선 점 두 개로 속도를 되살려야 범위가 곧바로 제 위치를 잡는다.
    */
+  /* 추적률이 이 값 미만이면 주황으로 띄우고 무엇을 바꿀지 같이 적는다.
+     80%면 끊긴 구간을 손으로 메울 만하고, 그 아래면 설정을 고치는 편이 빠르다. */
+  const RATE_OK = 80;
+
+  function showTrackBox(found, missed) {
+    if (!trackBox) return;
+    const total = found + missed;
+    const rate = total ? Math.round((found / total) * 100) : 0;
+    trackBox.hidden = false;
+    trackBox.className = "track-box " + (rate >= RATE_OK ? "ok" : "low");
+    trackRate.textContent = rate + "%";
+    trackCounts.textContent = "찾음 " + found + "프레임 · 놓침 " + missed + "프레임";
+    // 단계 번호로 안내하지 않는다 — 추적 확인 페이지는 번호가 1·2·3으로 다르다.
+    trackAdvice.hidden = rate >= RATE_OK;
+    trackAdvice.textContent = rate >= RATE_OK ? ""
+      : "「테이프 색 · 추적 범위」에서 최소 선명도를 낮추거나, 허용 오차·범위를 넓혀 다시 해 보세요.";
+  }
+
+  function hideTrackBox() {
+    if (trackBox) trackBox.hidden = true;
+  }
+
   async function runTracking(startAt) {
     if (state.tracking) { state.abort = true; return; }
     if (!state.target || !state.roi) return;
 
     state.tracking = true;
+    hideTrackBox();   // 돌리는 동안 직전 추적률이 남아 있으면 헷갈린다
     state.abort = false;
     stopSlowPlay();
     trackBtn.textContent = "중지";
@@ -886,15 +914,10 @@
     stageBusy.hidden = true;
     progressWrap.hidden = true;
 
-    // 추적률 — 추적 확인 페이지에서는 이 숫자가 유일한 결과다.
-    // 단계 번호로 안내하지 않는다 (확인 페이지는 번호가 1·2·3으로 다르다).
-    const total = found + missed;
-    const rate = total ? Math.round((found / total) * 100) : 0;
-    trackReadout.textContent = "찾음 " + found + "프레임 · 놓침 " + missed + "프레임"
-      + " · 추적률 " + rate + "%"
-      + (missed > found * 0.3
-          ? "  ← 「테이프 색 · 추적 범위」에서 최소 선명도를 낮추거나, 허용 오차·범위를 넓혀 보세요"
-          : "");
+    // 추적률은 이 도구에서 가장 중요한 숫자다. 한 줄짜리 회색 글씨에 섞어 두었더니
+    // 학생이 못 보고 지나가서, 아래 전용 상자로 따로 뺐다.
+    showTrackBox(found, missed);
+    trackReadout.textContent = "";
     delPointBtn.disabled = false;
     clearPointsBtn.disabled = false;
     retrackBtn.disabled = false;
@@ -2165,6 +2188,7 @@
     updateScaleReadout();
     updateRoiReadout();
     trackReadout.textContent = "아직 추적하지 않았습니다.";
+    hideTrackBox();
     renderResults();
   }
 
@@ -2276,6 +2300,7 @@
     retrackBtn.disabled = true;
     delFromHereBtn.disabled = true;
     trackReadout.textContent = "아직 추적하지 않았습니다.";
+    hideTrackBox();
     computeResults();
     redraw();
   });

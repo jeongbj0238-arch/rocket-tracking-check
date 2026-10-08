@@ -595,3 +595,53 @@ body[data-page="video-analyzer"] .btn-secondary.is-armed { background: var(--acc
 /* 발사속력 타당성 — 예상 범위 안이면 조용한 초록, 벗어나면 노랑 */
 .callout.ok { background: #eef7ee; color: #2c5530; }
 .callout.ok b { color: #1f4423; }
+
+/* ---------- 추적 결과 상자 ----------
+   한 줄짜리 회색 글씨로 두었더니 학생이 못 보고 지나갔다.
+   추적률이 이 도구에서 가장 중요한 숫자라 따로 떼어 크게 보여 준다. */
+.track-box {
+  margin-top: 10px;
+  border: 1.5px solid #cbd5dd;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+}
+.track-box .tb-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.track-box .tb-label { font-size: 12.5px; font-weight: 600; color: var(--steel); }
+.track-box .tb-rate {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+.track-box .tb-counts {
+  margin: 7px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--steel);
+}
+.track-box .tb-advice {
+  margin: 9px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+/* 추적률이 높을 때 — 조용한 초록 */
+.track-box.ok { border-color: #a9ccae; background: #eef7ee; }
+.track-box.ok .tb-label { color: #2c5530; }
+.track-box.ok .tb-rate { color: #1f4423; }
+.track-box.ok .tb-counts { color: #3d6b42; }
+
+/* 낮을 때 — 주황. 무엇을 바꾸면 되는지 같이 띄운다 */
+.track-box.low { border-color: #e8c489; background: #fff6e8; }
+.track-box.low .tb-label { color: #6b4a12; }
+.track-box.low .tb-rate { color: #8a5a00; }
+.track-box.low .tb-counts { color: #7a5a1e; }
+.track-box.low .tb-advice { color: #8a5a00; }
